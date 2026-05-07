@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Position Sizing</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Sarabun:wght@300;400;600&display=swap');
+
+:root {
+–bg: #0a0e1a;
+–card: #111827;
+–border: #1e2d45;
+–accent: #00d4aa;
+–accent2: #ff6b35;
+–text: #e2e8f0;
+–muted: #64748b;
+–green: #10b981;
+–red: #f43f5e;
+}
+
+- { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: ‘Sarabun’, sans-serif;
+min-height: 100vh;
+padding: 16px;
+background-image: radial-gradient(ellipse at 20% 0%, #001a2e55 0%, transparent 60%),
+radial-gradient(ellipse at 80% 100%, #00d4aa0a 0%, transparent 50%);
+}
+
+h1 {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 1.1rem;
+font-weight: 700;
+color: var(–accent);
+letter-spacing: 0.1em;
+text-transform: uppercase;
+margin-bottom: 4px;
+}
+
+.subtitle {
+font-size: 0.78rem;
+color: var(–muted);
+margin-bottom: 20px;
+font-family: ‘IBM Plex Mono’, monospace;
+}
+
+.card {
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 12px;
+padding: 16px;
+margin-bottom: 12px;
+}
+
+label {
+display: block;
+font-size: 0.72rem;
+color: var(–muted);
+margin-bottom: 6px;
+letter-spacing: 0.05em;
+text-transform: uppercase;
+font-weight: 600;
+}
+
+input[type=“number”] {
+width: 100%;
+background: #0d1424;
+border: 1px solid var(–border);
+border-radius: 8px;
+color: var(–text);
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 1.4rem;
+font-weight: 600;
+padding: 12px 14px;
+outline: none;
+transition: border-color 0.2s;
+-webkit-appearance: none;
+appearance: none;
+}
+
+input[type=“number”]:focus {
+border-color: var(–accent);
+box-shadow: 0 0 0 3px #00d4aa18;
+}
+
+input[type=“number”]::-webkit-inner-spin-button,
+input[type=“number”]::-webkit-outer-spin-button { opacity: 1; }
+
+.suffix {
+font-size: 0.75rem;
+color: var(–muted);
+font-family: ‘IBM Plex Mono’, monospace;
+margin-top: 5px;
+}
+
+.rows-container {
+display: flex;
+flex-direction: column;
+gap: 10px;
+}
+
+.row-card {
+background: #0d1424;
+border: 1px solid var(–border);
+border-radius: 10px;
+padding: 12px 14px;
+display: flex;
+align-items: center;
+gap: 10px;
+transition: border-color 0.2s;
+}
+
+.row-card:focus-within {
+border-color: #00d4aa55;
+}
+
+.row-num {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 0.7rem;
+color: var(–muted);
+min-width: 18px;
+}
+
+.row-input {
+flex: 1;
+background: transparent;
+border: none;
+color: var(–text);
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 1.2rem;
+font-weight: 600;
+outline: none;
+-webkit-appearance: none;
+appearance: none;
+min-width: 0;
+}
+
+.row-input::placeholder { color: #2a3a50; }
+
+.pct-label {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 0.8rem;
+color: var(–muted);
+}
+
+.arrow {
+color: var(–muted);
+font-size: 0.9rem;
+}
+
+.row-result {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 1.15rem;
+font-weight: 700;
+color: var(–accent);
+text-align: right;
+min-width: 90px;
+}
+
+.row-result.zero { color: var(–muted); }
+
+.del-btn {
+background: none;
+border: none;
+color: #2a3a50;
+cursor: pointer;
+font-size: 1rem;
+padding: 4px;
+line-height: 1;
+transition: color 0.15s;
+}
+
+.del-btn:hover { color: var(–red); }
+
+.add-btn {
+width: 100%;
+background: transparent;
+border: 1px dashed #1e2d45;
+border-radius: 10px;
+color: var(–muted);
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 0.8rem;
+padding: 11px;
+cursor: pointer;
+letter-spacing: 0.05em;
+transition: all 0.2s;
+margin-top: 6px;
+}
+
+.add-btn:hover {
+border-color: var(–accent);
+color: var(–accent);
+background: #00d4aa08;
+}
+
+.formula-bar {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 0.68rem;
+color: #2a4060;
+margin-top: 5px;
+min-height: 14px;
+}
+
+.summary {
+border-top: 1px solid var(–border);
+padding-top: 14px;
+margin-top: 4px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+flex-wrap: wrap;
+gap: 8px;
+}
+
+.summary-label {
+font-size: 0.72rem;
+color: var(–muted);
+text-transform: uppercase;
+letter-spacing: 0.05em;
+font-weight: 600;
+}
+
+.summary-val {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 1rem;
+font-weight: 700;
+color: var(–accent2);
+}
+
+.mode-toggle {
+display: flex;
+gap: 6px;
+margin-bottom: 12px;
+}
+
+.mode-btn {
+flex: 1;
+padding: 8px;
+border-radius: 8px;
+border: 1px solid var(–border);
+background: transparent;
+color: var(–muted);
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 0.72rem;
+cursor: pointer;
+transition: all 0.2s;
+letter-spacing: 0.04em;
+}
+
+.mode-btn.active {
+background: var(–accent);
+border-color: var(–accent);
+color: #000;
+font-weight: 700;
+}
+
+.tag {
+display: inline-block;
+background: #00d4aa18;
+color: var(–accent);
+border-radius: 4px;
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 0.65rem;
+padding: 2px 6px;
+margin-left: 6px;
+vertical-align: middle;
+}
+</style>
+
+</head>
+<body>
+
+<h1>⚡ Position Sizing</h1>
+<div class="subtitle">RISK CALCULATOR</div>
+
+<!-- Mode -->
+
+<div class="mode-toggle">
+  <button class="mode-btn active" id="modeRisk" onclick="setMode('risk')">Risk Amount → Lot</button>
+  <button class="mode-btn" id="modeLot" onclick="setMode('lot')">Lot → Risk Amount</button>
+</div>
+
+<!-- Capital / Risk -->
+
+<div class="card">
+  <div id="topLabel1">
+    <label>💰 เงินทุน / Capital</label>
+    <input type="number" id="capital" value="10000" inputmode="decimal" step="any" oninput="calc()">
+    <div class="suffix">USD / THB / ฿ (หน่วยใดก็ได้)</div>
+  </div>
+  <div style="height:14px"></div>
+  <div id="topLabel2">
+    <label>🎯 Risk % ต่อเทรด</label>
+    <input type="number" id="riskPct" value="1" inputmode="decimal" step="any" oninput="calc()">
+    <div class="suffix">เช่น 1 = เสียไม่เกิน 1% ต่อ position</div>
+  </div>
+</div>
+
+<!-- SL rows -->
+
+<div class="card">
+  <label id="rowsLabel">📉 Stop Loss % (เปลี่ยนแต่ละ trade)</label>
+  <div class="rows-container" id="rows"></div>
+  <button class="add-btn" onclick="addRow()">＋ เพิ่ม SL row</button>
+
+  <div class="summary" id="summaryBox" style="display:none">
+    <div>
+      <div class="summary-label">Risk Amount</div>
+      <div class="summary-val" id="summaryRisk">—</div>
+    </div>
+    <div style="text-align:right">
+      <div class="summary-label">Formula</div>
+      <div class="formula-bar" id="summaryFormula">—</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let mode = 'risk'; // risk: SL% → position size | lot: lot → risk%
+let rows = [];
+let nextId = 0;
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('modeRisk').classList.toggle('active', m === 'risk');
+  document.getElementById('modeLot').classList.toggle('active', m === 'lot');
+
+  if (m === 'risk') {
+    document.getElementById('topLabel1').innerHTML = `
+      <label>💰 เงินทุน / Capital</label>
+      <input type="number" id="capital" value="${document.getElementById('capital')?.value||10000}" inputmode="decimal" step="any" oninput="calc()">
+      <div class="suffix">USD / THB / ฿</div>`;
+    document.getElementById('topLabel2').innerHTML = `
+      <label>🎯 Risk % ต่อเทรด</label>
+      <input type="number" id="riskPct" value="${document.getElementById('riskPct')?.value||1}" inputmode="decimal" step="any" oninput="calc()">
+      <div class="suffix">เช่น 1 = เสียไม่เกิน 1% ต่อ position</div>`;
+    document.getElementById('rowsLabel').textContent = '📉 Stop Loss % (เปลี่ยนแต่ละ trade)';
+  } else {
+    document.getElementById('topLabel1').innerHTML = `
+      <label>💰 เงินทุน / Capital</label>
+      <input type="number" id="capital" value="${document.getElementById('capital')?.value||10000}" inputmode="decimal" step="any" oninput="calc()">
+      <div class="suffix">USD / THB / ฿</div>`;
+    document.getElementById('topLabel2').innerHTML = `
+      <label>📦 Lot / จำนวน Units</label>
+      <input type="number" id="riskPct" value="${document.getElementById('riskPct')?.value||1}" inputmode="decimal" step="any" oninput="calc()">
+      <div class="suffix">ใส่ lot size ที่ต้องการ</div>`;
+    document.getElementById('rowsLabel').textContent = '📉 Stop Loss % (เปลี่ยนแต่ละ trade)';
+  }
+  calc();
+}
+
+function addRow(val = '') {
+  const id = nextId++;
+  rows.push({ id, val });
+  renderRows();
+  // focus new input
+  setTimeout(() => {
+    const el = document.getElementById('row_' + id);
+    if (el) el.focus();
+  }, 50);
+}
+
+function removeRow(id) {
+  rows = rows.filter(r => r.id !== id);
+  renderRows();
+  calc();
+}
+
+function renderRows() {
+  const container = document.getElementById('rows');
+  container.innerHTML = '';
+  rows.forEach((r, i) => {
+    const div = document.createElement('div');
+    div.className = 'row-card';
+    div.innerHTML = `
+      <span class="row-num">${i+1}</span>
+      <input class="row-input" id="row_${r.id}" type="number" inputmode="decimal" step="any"
+        placeholder="0.00" value="${r.val}"
+        oninput="updateRow(${r.id}, this.value); calcRow(${r.id})">
+      <span class="pct-label">%</span>
+      <span class="arrow">→</span>
+      <span class="row-result zero" id="res_${r.id}">—</span>
+      <button class="del-btn" onclick="removeRow(${r.id})">✕</button>
+    `;
+    container.appendChild(div);
+  });
+  calc();
+}
+
+function updateRow(id, val) {
+  const r = rows.find(x => x.id === id);
+  if (r) r.val = val;
+}
+
+function calc() {
+  const capital = parseFloat(document.getElementById('capital')?.value) || 0;
+  const riskPct = parseFloat(document.getElementById('riskPct')?.value) || 0;
+
+  let hasAny = false;
+  rows.forEach(r => {
+    const el = document.getElementById('res_' + r.id);
+    if (!el) return;
+    const sl = parseFloat(r.val) || 0;
+    if (sl <= 0 || capital <= 0 || riskPct <= 0) {
+      el.textContent = '—';
+      el.className = 'row-result zero';
+      return;
+    }
+    let result, formula;
+    if (mode === 'risk') {
+      // position size = (capital * riskPct%) / sl%
+      result = (capital * riskPct / 100) / (sl / 100);
+      formula = (${capital} × ${riskPct}%) ÷ ${sl}%;
+    } else {
+      // risk amount = lot * sl%
+      result = riskPct * (sl / 100);
+      formula = ${riskPct} lots × ${sl}%;
+    }
+    el.textContent = result >= 1000
+      ? result.toLocaleString('en-US', { maximumFractionDigits: 2 })
+      : result.toFixed(4);
+    el.className = 'row-result';
+    hasAny = true;
+  });
+
+  // summary
+  const box = document.getElementById('summaryBox');
+  if (capital > 0 && riskPct > 0) {
+    box.style.display = 'flex';
+    const riskAmt = capital * riskPct / 100;
+    document.getElementById('summaryRisk').textContent =
+      mode === 'risk'
+        ? ${riskAmt.toLocaleString('en-US', {maximumFractionDigits:2})} (${riskPct}%)
+        : ${capital.toLocaleString()} capital;
+    document.getElementById('summaryFormula').textContent =
+      mode === 'risk'
+        ? Capital × Risk% ÷ SL%
+        : Lots × SL%;
+  } else {
+    box.style.display = 'none';
+  }
+}
+
+function calcRow(id) {
+  updateRow(id, document.getElementById('row_' + id)?.value || '');
+  calc();
+}
+
+// init
+addRow('0.542');
+addRow('1.598');
+</script>
+
+</body>
+</html>
